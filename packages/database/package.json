@@ -4,7 +4,30 @@
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "scripts": { "generate": "prisma generate", "migrate:dev": "prisma migrate dev", "migrate:deploy": "prisma migrate deploy", "db:studio": "prisma studio", "build": "prisma generate && tsc", "lint": "eslint src", "typecheck": "tsc --noEmit", "test": "echo 'No database tests configured yet'" },
-  "dependencies": { "@prisma/client": "^6.3.1" },
-  "devDependencies": { "@types/node": "^22.13.1", "eslint": "^9.19.0", "prisma": "^6.3.1", "typescript": "^5.7.3" }
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "build": "prisma generate && tsc",
+    "lint": "eslint src",
+    "typecheck": "prisma generate && tsc --noEmit",
+    "test": "echo 'No database tests configured yet'"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "eslint": "^9.19.0",
+    "prisma": "^6.3.1",
+    "typescript": "^5.7.3"
+  }
 }
