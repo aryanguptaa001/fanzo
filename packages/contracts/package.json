@@ -1,0 +1,9 @@
+{
+  "name": "@fanzo/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": { "build": "tsc --noEmit", "lint": "eslint src", "typecheck": "tsc --noEmit", "test": "echo 'No contract tests configured yet'" },
+  "devDependencies": { "@types/node": "^22.13.1", "eslint": "^9.19.0", "typescript": "^5.7.3" }
+}

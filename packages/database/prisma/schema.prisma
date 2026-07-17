@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  FAN
+  CREATOR
+  ADMIN
+  MODERATOR
+}
+
+enum VerificationStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  ROLE_CHANGE
+  VERIFICATION_DECISION
+}
+
+model User {
+  id          String       @id @default(uuid()) @db.Uuid
+  clerkUserId String       @unique @map("clerk_user_id")
+  email       String       @unique
+  displayName String?      @map("display_name")
+  imageUrl    String?      @map("image_url")
+  role        UserRole     @default(FAN)
+  isActive    Boolean      @default(true) @map("is_active")
+  creator     CreatorProfile?
+  auditLogs   AuditLog[]   @relation("ActorAuditLogs")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?    @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([role, isActive])
+  @@map("users")
+}
+
+model CreatorProfile {
+  id                 String             @id @default(uuid()) @db.Uuid
+  userId             String             @unique @map("user_id") @db.Uuid
+  username           String             @unique
+  displayName        String             @map("display_name")
+  bio                String?
+  avatarUrl          String?            @map("avatar_url")
+  coverImageUrl      String?            @map("cover_image_url")
+  websiteUrl         String?            @map("website_url")
+  verificationStatus VerificationStatus @default(NONE) @map("verification_status")
+  user               User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([verificationStatus])
+  @@map("creator_profiles")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid()) @db.Uuid
+  actorId    String?     @map("actor_id") @db.Uuid
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String      @map("entity_id")
+  metadata   Json?
+  ipAddress  String?     @map("ip_address")
+  userAgent  String?     @map("user_agent")
+  actor      User?       @relation("ActorAuditLogs", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@map("audit_logs")
+}

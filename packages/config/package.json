@@ -1,0 +1,7 @@
+{
+  "name": "@fanzo/config",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": { "build": "tsc --noEmit", "lint": "eslint src", "typecheck": "tsc --noEmit", "test": "echo 'No config tests configured yet'" },
+  "devDependencies": { "eslint": "^9.19.0", "typescript": "^5.7.3" }
+}
