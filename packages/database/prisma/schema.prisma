@@ -57,6 +57,15 @@ model CreatorProfile {
   avatarUrl          String?            @map("avatar_url")
   coverImageUrl      String?            @map("cover_image_url")
   websiteUrl         String?            @map("website_url")
+  location           String?
+  category           String?
+  languages          String[]           @default([])
+  theme              String             @default("midnight")
+  accentColor        String             @default("#7c3aed") @map("accent_color")
+  isAvailableForChat Boolean            @default(false) @map("is_available_for_chat")
+  isAvailableForAudioCall Boolean       @default(false) @map("is_available_for_audio_call")
+  isAvailableForVideoCall Boolean       @default(false) @map("is_available_for_video_call")
+  isAvailableForBrandDeals Boolean      @default(false) @map("is_available_for_brand_deals")
   verificationStatus VerificationStatus @default(NONE) @map("verification_status")
   user               User               @relation(fields: [userId], references: [id], onDelete: Restrict)
   createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
