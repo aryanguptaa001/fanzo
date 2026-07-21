@@ -3,13 +3,15 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { envSchema } from './config/env.schema';
 import { HealthModule } from './modules/health/health.module';
+import { CreatorsModule } from './modules/creators/creators.module';
+import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', '../../.env'],
       validationSchema: envSchema,
     }),
     LoggerModule.forRoot({
@@ -20,6 +22,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     PrismaModule,
     HealthModule,
+    UsersModule,
+    CreatorsModule,
   ],
 })
 export class AppModule {}

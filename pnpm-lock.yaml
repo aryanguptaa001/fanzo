@@ -144,6 +144,9 @@ importers:
       '@fanzo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@next/env':
+        specifier: ^15.1.6
+        version: 15.5.20
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
