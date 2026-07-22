@@ -13,8 +13,9 @@ import {
   Video,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { CreatorProfile } from '../../lib/creator';
+import type { CreatorFeed, CreatorProfile } from '../../lib/creator';
 import { SiteLogo } from '../site-logo';
+import { CreatorFeedList } from '../posts/creator-feed';
 
 function SoonButton({
   children,
@@ -36,7 +37,7 @@ function SoonButton({
   );
 }
 
-export function PublicProfile({ creator }: { creator: CreatorProfile }) {
+export function PublicProfile({ creator, feed }: { creator: CreatorProfile; feed: CreatorFeed }) {
   const initials = creator.displayName
     .split(/\s+/)
     .map((part) => part[0])
@@ -204,16 +205,8 @@ export function PublicProfile({ creator }: { creator: CreatorProfile }) {
                 </span>
               ))}
             </div>
-            <div className="grid min-h-56 place-items-center text-center">
-              <div>
-                <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-violet-50 text-violet-600">
-                  <ImageIcon />
-                </div>
-                <h2 className="mt-4 font-bold">Creator content is coming soon.</h2>
-                <p className="mt-1 text-sm text-zinc-500">
-                  Posts, photos, videos, and products will live here.
-                </p>
-              </div>
+            <div className="mt-6">
+              <CreatorFeedList creator={creator} initialFeed={feed} />
             </div>
           </section>
           {creator.isAvailableForBrandDeals ? (

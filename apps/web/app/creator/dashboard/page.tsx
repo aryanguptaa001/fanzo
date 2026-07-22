@@ -1,22 +1,28 @@
 import {
   BarChart3,
   BriefcaseBusiness,
+  FileText,
   Headphones,
   MessageCircle,
   Radio,
+  Plus,
   Settings2,
   Users,
   Video,
 } from 'lucide-react';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { SiteLogo } from '../../../components/site-logo';
 import { siteUrl } from '../../../lib/creator';
-import { fetchMyCreator } from '../../../lib/creator-server';
+import { fetchMyCreator, fetchMyPosts } from '../../../lib/creator-server';
 
 export default async function CreatorDashboardPage() {
   const creator = await fetchMyCreator();
   if (!creator) redirect('/creator/onboarding');
+  const posts = await fetchMyPosts();
+  const draftCount = posts.items.filter((post) => post.status === 'DRAFT').length;
+  const publishedCount = posts.items.filter((post) => post.status === 'PUBLISHED').length;
   const completionFields = [
     creator.displayName,
     creator.bio,
@@ -84,6 +90,66 @@ export default async function CreatorDashboardPage() {
           </div>
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/20">
             <div className="h-full rounded-full bg-white" style={{ width: `${completion}%` }} />
+          </div>
+        </section>
+        <section className="mt-10">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-xl font-black">Content</h2>
+              <p className="mt-1 text-sm text-zinc-500">Create, refine, and publish your posts.</p>
+            </div>
+            <Link
+              href={'/creator/posts/new' as Route}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 text-sm font-bold text-white"
+            >
+              <Plus className="h-4 w-4" />
+              Create post
+            </Link>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-4">
+            <div className="rounded-2xl border bg-white p-5">
+              <p className="text-sm text-zinc-500">Drafts</p>
+              <p className="mt-1 text-3xl font-black">{draftCount}</p>
+            </div>
+            <div className="rounded-2xl border bg-white p-5">
+              <p className="text-sm text-zinc-500">Published</p>
+              <p className="mt-1 text-3xl font-black">{publishedCount}</p>
+            </div>
+          </div>
+          <div className="mt-4 overflow-hidden rounded-2xl border bg-white">
+            {posts.items.length ? (
+              posts.items.slice(0, 5).map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/creator/posts/${post.id}/edit` as Route}
+                  className="flex items-center gap-4 border-b p-4 last:border-0 hover:bg-zinc-50"
+                >
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">
+                      {post.caption ||
+                        `${post.media.length} media item${post.media.length === 1 ? '' : 's'}`}
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-400">
+                      {post.status?.toLowerCase()} · {post.visibility.toLowerCase()}
+                    </p>
+                  </div>
+                  <span className="text-sm font-bold text-violet-600">Edit</span>
+                </Link>
+              ))
+            ) : (
+              <div className="grid min-h-48 place-items-center p-6 text-center">
+                <div>
+                  <FileText className="mx-auto h-9 w-9 text-zinc-300" />
+                  <h3 className="mt-3 font-bold">Your first post starts here.</h3>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    Share a thought, image, or video with your audience.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </section>
         <h2 className="mt-10 text-xl font-black">Your creator tools</h2>

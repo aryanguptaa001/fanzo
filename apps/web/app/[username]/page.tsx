@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PublicProfile } from '../../components/creator/public-profile';
-import { fetchPublicCreator, siteUrl } from '../../lib/creator';
+import { fetchCreatorFeed, fetchPublicCreator, siteUrl } from '../../lib/creator';
 
 type PageProps = { params: Promise<{ username: string }> };
 
@@ -30,5 +30,6 @@ export default async function CreatorPublicPage({ params }: PageProps) {
   const { username } = await params;
   const creator = await fetchPublicCreator(username);
   if (!creator) notFound();
-  return <PublicProfile creator={creator} />;
+  const feed = await fetchCreatorFeed(creator.username);
+  return <PublicProfile creator={creator} feed={feed} />;
 }

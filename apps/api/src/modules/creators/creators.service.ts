@@ -89,6 +89,15 @@ export class CreatorsService {
     const username = normalizeCreatorUsername(usernameInput);
     const profile = await this.prisma.creatorProfile.findFirst({
       where: { username, deletedAt: null, user: { isActive: true, deletedAt: null } },
+      include: {
+        _count: {
+          select: {
+            posts: {
+              where: { status: 'PUBLISHED', visibility: 'PUBLIC', deletedAt: null },
+            },
+          },
+        },
+      },
     });
     if (!profile) throw new NotFoundException('Creator profile not found');
     return this.toPublicResponse(profile);
@@ -108,7 +117,7 @@ export class CreatorsService {
     };
   }
 
-  private toPublicResponse(profile: CreatorProfile) {
+  private toPublicResponse(profile: CreatorProfile & { _count?: { posts: number } }) {
     return {
       username: profile.username,
       displayName: profile.displayName,
@@ -127,7 +136,7 @@ export class CreatorsService {
       isAvailableForVideoCall: profile.isAvailableForVideoCall,
       isAvailableForBrandDeals: profile.isAvailableForBrandDeals,
       followersCount: 0,
-      postsCount: 0,
+      postsCount: profile._count?.posts ?? 0,
       subscribersCount: 0,
       capabilities: {
         messaging: profile.isAvailableForChat,

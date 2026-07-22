@@ -30,50 +30,105 @@ enum AuditAction {
   VERIFICATION_DECISION
 }
 
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PostVisibility {
+  PUBLIC
+  FOLLOWERS
+  SUBSCRIBERS
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
 model User {
-  id          String       @id @default(uuid()) @db.Uuid
-  clerkUserId String       @unique @map("clerk_user_id")
-  email       String       @unique
-  displayName String?      @map("display_name")
-  imageUrl    String?      @map("image_url")
-  role        UserRole     @default(FAN)
-  isActive    Boolean      @default(true) @map("is_active")
+  id          String          @id @default(uuid()) @db.Uuid
+  clerkUserId String          @unique @map("clerk_user_id")
+  email       String          @unique
+  displayName String?         @map("display_name")
+  imageUrl    String?         @map("image_url")
+  role        UserRole        @default(FAN)
+  isActive    Boolean         @default(true) @map("is_active")
   creator     CreatorProfile?
-  auditLogs   AuditLog[]   @relation("ActorAuditLogs")
-  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt   DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  auditLogs   AuditLog[]      @relation("ActorAuditLogs")
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?       @map("deleted_at") @db.Timestamptz(6)
 
   @@index([role, isActive])
   @@map("users")
 }
 
 model CreatorProfile {
-  id                 String             @id @default(uuid()) @db.Uuid
-  userId             String             @unique @map("user_id") @db.Uuid
-  username           String             @unique
-  displayName        String             @map("display_name")
-  bio                String?
-  avatarUrl          String?            @map("avatar_url")
-  coverImageUrl      String?            @map("cover_image_url")
-  websiteUrl         String?            @map("website_url")
-  location           String?
-  category           String?
-  languages          String[]           @default([])
-  theme              String             @default("midnight")
-  accentColor        String             @default("#7c3aed") @map("accent_color")
-  isAvailableForChat Boolean            @default(false) @map("is_available_for_chat")
-  isAvailableForAudioCall Boolean       @default(false) @map("is_available_for_audio_call")
-  isAvailableForVideoCall Boolean       @default(false) @map("is_available_for_video_call")
-  isAvailableForBrandDeals Boolean      @default(false) @map("is_available_for_brand_deals")
-  verificationStatus VerificationStatus @default(NONE) @map("verification_status")
-  user               User               @relation(fields: [userId], references: [id], onDelete: Restrict)
-  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  id                       String             @id @default(uuid()) @db.Uuid
+  userId                   String             @unique @map("user_id") @db.Uuid
+  username                 String             @unique
+  displayName              String             @map("display_name")
+  bio                      String?
+  avatarUrl                String?            @map("avatar_url")
+  coverImageUrl            String?            @map("cover_image_url")
+  websiteUrl               String?            @map("website_url")
+  location                 String?
+  category                 String?
+  languages                String[]           @default([])
+  theme                    String             @default("midnight")
+  accentColor              String             @default("#7c3aed") @map("accent_color")
+  isAvailableForChat       Boolean            @default(false) @map("is_available_for_chat")
+  isAvailableForAudioCall  Boolean            @default(false) @map("is_available_for_audio_call")
+  isAvailableForVideoCall  Boolean            @default(false) @map("is_available_for_video_call")
+  isAvailableForBrandDeals Boolean            @default(false) @map("is_available_for_brand_deals")
+  verificationStatus       VerificationStatus @default(NONE) @map("verification_status")
+  user                     User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  posts                    Post[]
+  createdAt                DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                DateTime?          @map("deleted_at") @db.Timestamptz(6)
 
   @@index([verificationStatus])
   @@map("creator_profiles")
+}
+
+model Post {
+  id               String         @id @default(uuid()) @db.Uuid
+  creatorProfileId String         @map("creator_profile_id") @db.Uuid
+  caption          String?
+  status           PostStatus     @default(DRAFT)
+  visibility       PostVisibility @default(PUBLIC)
+  publishedAt      DateTime?      @map("published_at") @db.Timestamptz(6)
+  creatorProfile   CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Restrict)
+  media            PostMedia[]
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime?      @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([creatorProfileId, status, createdAt])
+  @@index([status, visibility, publishedAt])
+  @@map("posts")
+}
+
+model PostMedia {
+  id              String    @id @default(uuid()) @db.Uuid
+  postId          String    @map("post_id") @db.Uuid
+  type            MediaType
+  storageKey      String    @unique @map("storage_key")
+  url             String
+  mimeType        String    @map("mime_type")
+  sizeBytes       BigInt    @map("size_bytes")
+  width           Int?
+  height          Int?
+  durationSeconds Int?      @map("duration_seconds")
+  sortOrder       Int       @default(0) @map("sort_order")
+  post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([postId, sortOrder])
+  @@map("post_media")
 }
 
 model AuditLog {

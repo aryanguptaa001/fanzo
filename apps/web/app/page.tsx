@@ -1,4 +1,5 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -18,9 +19,9 @@ export default function HomePage() {
             </SignUpButton>
           </SignedOut>
           <SignedIn>
-            <a className="rounded-md border px-4 py-2" href="/profile">
+            <Link className="rounded-md border px-4 py-2" href="/profile">
               Profile
-            </a>
+            </Link>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
         </div>
